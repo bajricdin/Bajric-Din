@@ -1,0 +1,71 @@
+// Curry function using .bind()
+function curry(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn(...args);
+    } else {
+      return curried.bind(null, ...args);
+    }
+  };
+}
+
+
+// Curried version
+function make3Curried(a) {
+  return function(b) {
+    return function(c) {
+      return `${a}:${b}:${c}`;
+    };
+  };
+}
+
+
+// Partially applied function where b = 22 and e = 1960
+const fix2and5 = (a, c, d) => nonsense(a, 22, c, d, 1960);
+
+
+
+// Partial application function using closures
+function partial(fn) {
+  return function partiallyApplied(...presetArgs) {
+    return function(...laterArgs) {
+      let finalArgs = [];
+      let laterIndex = 0;
+
+      for (let i = 0; i < presetArgs.length; i++) {
+        if (presetArgs[i] === undefined) {
+          finalArgs.push(laterArgs[laterIndex++]);
+        } else {
+          finalArgs.push(presetArgs[i]);
+        }
+      }
+
+      // If there are remaining args (e.g. for make3, we might call with only a and b fixed first)
+      finalArgs = finalArgs.concat(laterArgs.slice(laterIndex));
+      
+      return fn(...finalArgs);
+    };
+  };
+}
+
+// 2. partialCurry using .bind()
+function partialCurry(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn(...args);
+    } else {
+      // Bind current args and return a new function waiting for the rest
+      const boundFn = fn.bind(null, ...args);
+      return partialCurry(boundFn);
+    }
+  };
+}
+// 2. Closure-based partial currying
+function partialCurryByClosure(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn(...args);
+    }
+    return (...nextArgs) => curried(...args, ...nextArgs);
+  };
+}
